@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+    My todo app
+    <script type="module">
+        import { LitElement } from 'https://unpkg.com/lit-element?module';
+        class TodoApp extends LitElement{
+            connectedCallback(){
+                super.connectedCallback();
+                console.log("lit element connected")
+            }
+        }
+    </script>
+</body>
+
+</html>
