@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+    <todo-app></todo-app>
+
+    <script type="module">
+        import { LitElement, html, css } from 'https://unpkg.com/lit-element?module';
+
+        class TodoList extends LitElement {
+            static get properties() {
+                return {
+                    todos: { type: Array },
+                };
+            }
+            static get styles() {
+                return css`
+      :host {
+        color: black;
+      }
+
+      ul {
+        list-style: none;
+        padding: 0;
+      }
+
+      button {
+        background-color: transparent;
+        border: none;
+      }
+    `;
+            }
+
+            render() {
+                if (!this.todos) {
+                    return html``;
+                }
+
+                return html`
+            <ol>
+              ${this.todos.map(
+                    todo => html`
+                  <li>
+                    <input
+                      type="checkbox"
+                      .checked=${todo.finished}
+                      @change=${e => this._changeTodoFinished(e, todo)}
+                    />
+                    ${todo.text}
+                    <button @click=${() => this._removeTodo(todo)}>X</button>
+                  </li>
+                `,
+                )}
+            </ol>
+          `;
+            }
+
+            _changeTodoFinished(e, changedTodo) {
+                const eventDetails = { changedTodo, finished: e.target.checked };
+                this.dispatchEvent(new CustomEvent('change-todo-finished', { detail: eventDetails }));
+            }
+
+            _removeTodo(item) {
+                this.dispatchEvent(new CustomEvent('remove-todo', { detail: item }));
+            }
+        }
+
+        customElements.define('todo-list', TodoList);
+
+        const title = "Todo App using lit-html-and-lit-element:basics"
+        const author = "Aman Suryawanshi";
+        const homepage = "https://github.com/coderaman594/";
+        const footerTemplate = html`<footer>Made with love by <a href="${homepage}">${author}</a></footer>`;
+
+
+        class TodoApp extends LitElement {
+            static get properties() {
+                return {
+                    todos: { type: Array }
+                }
+            }
+            constructor() {
+                super();
+                this.todos = [
+                    { text: 'Task A', finished: true },
+                    { text: 'Task B', finished: false },
+                    { text: 'Task X', finished: true }
+                ];
+            }
+            render() {
+
+                const finishedCount = this.todos.filter(e => e.finished).length;
+                const unfinishedCount = this.todos.length - finishedCount;
+
+                return html`
+                <h1>${title}</h1>
+
+                <input id="addTodoInput" placeholder="Task Name">
+                <button @click="${this._addTodo}">Add</button>
+
+                <ol>
+              ${this.todos.map(
+                    todo => html`
+                  <li>
+                    <input type="checkbox"
+                    .checked = ${todo.finished}
+                    @change = ${e => this._changeTodoFinished(e, todo)}
+                    />
+                    ${todo.text} (${todo.finished ? 'Finished' : 'Unfinished'})
+                    <button @click="${() => this._removeTodo(todo)}" >x</button>
+                    </li>
+                `,
+                )}
+            </ol>
+
+            <div>Total finished: ${finishedCount}</div>
+            <div>Total unfinished: ${unfinishedCount}</div>
+
+            ${footerTemplate}`;
+            }
+
+            _addTodo() {
+                const input = this.shadowRoot.getElementById('addTodoInput');
+                const text = input.value;
+                input.value = '';
+
+                this.todos = [...this.todos, { text, finished: false }];
+            }
+
+            _removeTodo(todo) {
+                this.todos = this.todos.filter(e => e !== todo);
+            }
+
+            _changeTodoFinished(e, changedTodo) {
+                const finished = e.target.checked;
+
+                this.todos = this.todos.map(todo => {
+                    if (todo !== changedTodo) {
+                        return todo;
+                    }
+                    return { ...changedTodo, finished };
+                })
+            }
+        }
+        customElements.define('todo-app', TodoApp);
+    </script>
+</body>
+
+</html>
